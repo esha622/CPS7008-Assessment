@@ -1,0 +1,12 @@
+{
+  "selected_model": "Logistic Regression",
+  "threshold": 0.6,
+  "accuracy": 0.8234086242299795,
+  "balanced_accuracy": 0.5785673098484768,
+  "precision": 0.20103092783505155,
+  "recall": 0.2746478873239437,
+  "f1": 0.23214285714285715,
+  "roc_auc": 0.6473133722730622,
+  "average_precision": 0.1664907731358105,
+  "brier_score": 0.23124616288464236
+}
