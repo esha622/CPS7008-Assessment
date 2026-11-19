@@ -1,16 +1,5 @@
-
-"""
-STEP 7: MODEL INTERPRETABILITY
-
-This program:
-1. Calculates permutation importance.
-2. Compares errors across gas customer groups.
-3. Saves feature importance and segment results.
-"""
-
 import joblib
 import pandas as pd
-
 from sklearn.inspection import permutation_importance
 
 from sklearn.metrics import (
@@ -23,8 +12,6 @@ from ml_utils import (
     OUTPUTS
 )
 
-
-# Load the saved data splits
 (
     X_train,
     X_val,
@@ -36,8 +23,6 @@ from ml_utils import (
     MODELS / "split_data.joblib"
 )
 
-
-# Load model and settings
 model = joblib.load(
     MODELS / "churn_pipeline.joblib"
 )
@@ -46,11 +31,6 @@ settings = joblib.load(
     MODELS / "settings.joblib"
 )
 
-
-# FEATURE IMPORTANCE
-
-# Permutation importance checks how model
-# performance changes when a feature is shuffled.
 importance = permutation_importance(
     model,
     X_test,
@@ -61,8 +41,6 @@ importance = permutation_importance(
     n_jobs=1
 )
 
-
-# Convert the importance values into a table
 importance_table = pd.DataFrame({
 
     "feature": X_test.columns,
@@ -72,33 +50,21 @@ importance_table = pd.DataFrame({
     "importance_std": importance.importances_std
 })
 
-
-# Rank features by importance
 importance_table = importance_table.sort_values(
     "importance_mean",
     ascending=False
 )
 
-
-# Save results
 importance_table.to_csv(
     OUTPUTS / "feature_importance.csv",
     index=False
 )
 
-
-# CUSTOMER SEGMENT ANALYSIS
-
-# Predict probabilities on test data
 prob = model.predict_proba(X_test)[:, 1]
-
-# Apply chosen threshold
 pred = (
     prob >= settings["threshold"]
 ).astype(int)
 
-
-# Compare customers with and without gas services
 rows = []
 
 for category in X_test["has_gas"].dropna().unique():
@@ -132,8 +98,6 @@ for category in X_test["has_gas"].dropna().unique():
         )
     })
 
-
-# Save segment results
 segment_table = pd.DataFrame(rows)
 
 segment_table.to_csv(

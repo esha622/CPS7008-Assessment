@@ -1,21 +1,3 @@
-
-"""
-STEP 6: FINAL MODEL EVALUATION
-
-Evaluate the selected model on the test set.
-
-This program calculates:
-- Accuracy
-- Balanced accuracy
-- Precision
-- Recall
-- F1-score
-- ROC-AUC
-- Average precision
-- Brier score
-- Confusion matrix
-"""
-
 import json
 import joblib
 import pandas as pd
@@ -43,8 +25,6 @@ from ml_utils import (
     OUTPUTS
 )
 
-
-# Load datasets
 (
     X_train,
     X_val,
@@ -56,30 +36,20 @@ from ml_utils import (
     MODELS / "split_data.joblib"
 )
 
-
-# Load fitted model
 model = joblib.load(
     MODELS / "churn_pipeline.joblib"
 )
 
-
-# Load chosen model settings
 settings = joblib.load(
     MODELS / "settings.joblib"
 )
 
-
-# Predict probability of churn
 prob = model.predict_proba(X_test)[:, 1]
 
-
-# Convert probabilities into 0 or 1
 pred = (
     prob >= settings["threshold"]
 ).astype(int)
 
-
-# Evaluate the model
 metrics = {
 
     "selected_model": settings["model"],
@@ -122,8 +92,6 @@ metrics = {
     )
 }
 
-
-# Save the evaluation results
 with open(
     OUTPUTS / "final_metrics.json",
     "w",
@@ -136,8 +104,6 @@ with open(
         indent=2
     )
 
-
-# Save individual predictions
 predictions = pd.DataFrame({
 
     "actual_churn": y_test.to_numpy(),
@@ -152,16 +118,12 @@ predictions.to_csv(
     index=False
 )
 
-
-# Create confusion matrix
 cm = confusion_matrix(
     y_test,
     pred,
     labels=[0, 1]
 )
 
-
-# Display confusion matrix
 ConfusionMatrixDisplay(
     cm,
     display_labels=["Retained", "Churned"]
@@ -178,8 +140,6 @@ plt.savefig(
 
 plt.close()
 
-
-# Print results
 print("\nFINAL TEST RESULTS")
 
 for name, value in metrics.items():

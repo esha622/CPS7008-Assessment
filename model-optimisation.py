@@ -1,15 +1,3 @@
-
-"""
-STEP 5: MODEL OPTIMISATION
-
-This program:
-1. Reads the model comparison.
-2. Selects the highest-ranked non-Dummy model.
-3. Tunes its hyperparameters.
-4. Chooses a classification threshold.
-5. Saves the fitted model.
-"""
-
 import argparse
 import joblib
 import numpy as np
@@ -33,8 +21,6 @@ from ml_utils import (
     make_pipeline
 )
 
-
-# Quick mode for initial testing
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -43,9 +29,6 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-
-
-# Load saved datasets
 (
     X_train,
     X_val,
@@ -57,24 +40,16 @@ args = parser.parse_args()
     MODELS / "split_data.joblib"
 )
 
-
-# Read results from the previous stage
 comparison = pd.read_csv(
     OUTPUTS / "model_comparison.csv"
 )
 
-
-# Dummy is only a reference model.
-# Select the first ranked actual classifier.
 best_name = comparison.loc[
     comparison["model"] != "Dummy",
     "model"
 ].iloc[0]
 
 print("Model selected for tuning:", best_name)
-
-
-# Define hyperparameter search spaces.
 params = {
 
     "Logistic Regression": {
@@ -100,16 +75,12 @@ params = {
     }
 }
 
-
-# Cross-validation for tuning.
 cv = StratifiedKFold(
     n_splits=3 if args.quick else 5,
     shuffle=True,
     random_state=SEED
 )
 
-
-# Grid search tests different settings.
 search = GridSearchCV(
     estimator=make_pipeline(best_name),
     param_grid=params[best_name],
@@ -118,24 +89,12 @@ search = GridSearchCV(
     n_jobs=1
 )
 
-
-# Fit only on the training dataset.
 search.fit(X_train, y_train)
-
-
-# Extract the best trained model.
 model = search.best_estimator_
-
-
-# Generate probabilities on validation customers.
 prob = model.predict_proba(X_val)[:, 1]
 
-
-# Test several possible classification thresholds.
 threshold_rows = []
-
 for threshold in np.arange(0.10, 0.71, 0.05):
-
     prediction = (
         prob >= threshold
     ).astype(int)
@@ -165,12 +124,7 @@ for threshold in np.arange(0.10, 0.71, 0.05):
         )
     })
 
-
-# Create threshold comparison table.
 table = pd.DataFrame(threshold_rows)
-
-
-# Select the threshold with highest F1.
 chosen_threshold = float(
     table.sort_values(
         "f1",
@@ -178,22 +132,15 @@ chosen_threshold = float(
     ).iloc[0]["threshold"]
 )
 
-
-# Save threshold experiment results.
 table.to_csv(
     OUTPUTS / "validation_thresholds.csv",
     index=False
 )
-
-
-# Save the final fitted pipeline.
 joblib.dump(
     model,
     MODELS / "churn_pipeline.joblib"
 )
 
-
-# Save model configuration.
 joblib.dump(
     {
         "model": best_name,
@@ -204,7 +151,6 @@ joblib.dump(
     },
     MODELS / "settings.joblib"
 )
-
 
 print("\nBest parameters:")
 print(search.best_params_)

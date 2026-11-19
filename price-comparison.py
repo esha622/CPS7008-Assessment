@@ -1,17 +1,3 @@
-
-"""
-OPTIONAL PRICING EXPERIMENT
-
-Compare:
-1. Customer-only features
-2. Customer + historical pricing features
-
-IMPORTANT:
-This is a retrospective experiment.
-The dataset does not establish a safe
-prediction-time cutoff for every customer.
-"""
-
 import pandas as pd
 
 from sklearn.model_selection import (
@@ -38,53 +24,32 @@ from ml_utils import (
     make_price_features
 )
 
-
-# Load datasets
 customers = load_customers()
-
 prices = pd.read_csv(
     DATA / "price_data.csv"
 )
-
-
-# Aggregate historical prices
 prices_aggregated = make_price_features(prices)
 
-
-# Merge one pricing row per customer
 joined = customers.merge(
     prices_aggregated,
     on="id",
     how="left",
     validate="one_to_one"
 )
-
-
-# Ensure the merge did not duplicate customers
 assert len(joined) == len(customers)
 
-
-# Find newly created price features
 price_features = [
     column
     for column in prices_aggregated.columns
     if column != "id"
 ]
 
-
-# Cross-validation configuration
 cv = StratifiedKFold(
     n_splits=3,
     shuffle=True,
     random_state=SEED
 )
-
-
-# Store experimental results
 rows = []
-
-
-# Compare two feature sets
 experiments = [
     ("Customer only", NUMERIC),
 
@@ -94,7 +59,6 @@ experiments = [
     )
 ]
 
-
 for label, numerical in experiments:
 
     print("\nRunning experiment:", label)
@@ -102,9 +66,6 @@ for label, numerical in experiments:
     X = joined[numerical + CATEGORICAL]
 
     y = joined["churn"]
-
-
-    # Preprocess the features
     prepare = ColumnTransformer([
 
         (
@@ -144,8 +105,6 @@ for label, numerical in experiments:
         )
     ])
 
-
-    # Use the same classifier for both experiments
     pipeline = Pipeline([
 
         ("prepare", prepare),
@@ -160,8 +119,6 @@ for label, numerical in experiments:
         )
     ])
 
-
-    # Cross-validation with average precision
     scores = cross_val_score(
         pipeline,
         X,
@@ -180,8 +137,6 @@ for label, numerical in experiments:
         "average_precision_std": scores.std()
     })
 
-
-# Compare results
 result = pd.DataFrame(rows)
 
 result.to_csv(

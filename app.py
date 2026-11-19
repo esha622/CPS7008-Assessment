@@ -1,14 +1,3 @@
-
-"""
-POWERCO CHURN PREDICTION DASHBOARD
-
-An optional Streamlit frontend for the
-CPS7008 machine learning project.
-
-Run:
-python -m streamlit run app.py
-"""
-
 import json
 import joblib
 import pandas as pd
@@ -21,8 +10,6 @@ from ml_utils import (
     load_customers
 )
 
-
-# CONFIGURE THE APPLICATION
 
 st.set_page_config(
     page_title="PowerCo Churn Dashboard",
@@ -38,8 +25,6 @@ st.caption(
 )
 
 
-# CHECK WHETHER A MODEL EXISTS
-
 model_file = MODELS / "churn_pipeline.joblib"
 settings_file = MODELS / "settings.joblib"
 
@@ -54,7 +39,7 @@ if not model_file.exists() or not settings_file.exists():
     st.stop()
 
 
-# LOAD THE TRAINED MODEL
+#Load the trained model
 
 @st.cache_resource
 def load_model():
@@ -118,7 +103,7 @@ with tab1:
     )
 
 
-# TAB 2: CHURN PREDICTION
+#Churn Prediction
 
 with tab2:
 
@@ -227,7 +212,7 @@ with tab2:
             st.dataframe(customer.T)
 
 
-# TAB 3: MODEL EVALUATION
+#Model Evaluation
 
 with tab3:
 

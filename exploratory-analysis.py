@@ -1,16 +1,5 @@
 
-"""
-STEP 2: EXPLORATORY DATA ANALYSIS
-
-Create charts showing:
-1. Churn distribution
-2. Churn by tenure
-3. Electricity consumption distributions
-"""
-
 import matplotlib
-
-# Save figures without opening separate windows.
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
@@ -22,15 +11,10 @@ from ml_utils import (
     OUTPUTS
 )
 
-
 customers = load_customers()
 
-# Folder for EDA charts
 figures = OUTPUTS / "figures"
 figures.mkdir(exist_ok=True)
-
-
-# CHART 1: CHURN DISTRIBUTION
 
 customers["churn"].value_counts().sort_index().plot.bar(
     color=["steelblue", "tomato"]
@@ -46,9 +30,6 @@ plt.savefig(
 )
 
 plt.close()
-
-
-# CHART 2: CHURN BY CUSTOMER TENURE
 
 customers["tenure_group"] = pd.cut(
     customers["num_years_antig"],
@@ -83,12 +64,7 @@ plt.savefig(
 
 plt.close()
 
-
-# CHART 3: ELECTRICITY CONSUMPTION
-
 for churn, group in customers.groupby("churn"):
-
-    # Log scale helps visualise skewed consumption.
     consumption = np.log1p(
         group["cons_12m"].clip(lower=0)
     )
